@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERP Dashboard</title>
+  <title> ERP Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -46,7 +46,7 @@
         <a href="#" class="block px-4 py-3 border-2 border-transparent hover:border-black rounded-2xl font-semibold tracking-wide transition-all">Buku Besar</a>
       </nav>
     </div>
-    <div class="text-sm font-bold">V 4.0.0 Monochromatic</div>
+    <div class="text-sm font-bold">V 4.1.0 Monochromatic</div>
   </aside>
 
   <!-- Main Content -->
@@ -89,7 +89,8 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b-2 border-black">
-                <th class="p-5 font-bold uppercase tracking-widest text-sm">Tanggal</th>
+                <!-- Header diubah menjadi WAKTU -->
+                <th class="p-5 font-bold uppercase tracking-widest text-sm">Waktu</th>
                 <th class="p-5 font-bold uppercase tracking-widest text-sm">Jenis</th>
                 <th class="p-5 font-bold uppercase tracking-widest text-sm">Kategori</th>
                 <th class="p-5 font-bold uppercase tracking-widest text-sm">Keterangan</th>
@@ -98,7 +99,6 @@
               </tr>
             </thead>
             <tbody id="table-body" class="divide-y-2 divide-black">
-              <!-- Data ditarik dari Google Sheets -->
               <tr><td colspan="6" class="p-5 text-center font-bold">Memuat data dari server...</td></tr>
             </tbody>
           </table>
@@ -110,7 +110,7 @@
 
   <script>
     // =======================================================
-    // ⚠️ GANTI URL INI DENGAN WEB APP URL ANDA YANG BARU DI-DEPLOY
+    // ⚠️ PASTIKAN URL INI MASIH SAMA DENGAN WEB APP ANDA
     // =======================================================
     const API_URL = 'https://script.google.com/macros/s/AKfycbyVv5tWJCyPyDcclhfCXZSPGK4j0BRDADCuGTV1qcg_Y0K-1uvBS7z9twe21wu97Wzt9Q/exec';
 
@@ -143,24 +143,30 @@
         reversedData.forEach((row, index) => {
           const jenis = String(row['Jenis']).toLowerCase();
           const nominal = Number(row['Nominal']) || 0;
-          const tglObj = new Date(row['Tanggal']);
           
-          // Kalkulasi Saldo Aset (Abaikan Mutasi untuk kalkulasi saldo)
+          // Menggunakan kolom Timestamp untuk mendapatkan waktu riil penginputan
+          const tsObj = new Date(row['Timestamp']); 
+          const dateOnlyObj = new Date(row['Tanggal']); 
+          
           if (jenis === 'pemasukan' || jenis === 'utang' || jenis === 'terima piutang') totalSaldo += nominal;
           if (jenis === 'pengeluaran' || jenis === 'bayar utang' || jenis === 'piutang') totalSaldo -= nominal;
 
-          // Kalkulasi Bulan Ini
-          if (tglObj.getMonth() === currentMonth && tglObj.getFullYear() === currentYear) {
+          if (dateOnlyObj.getMonth() === currentMonth && dateOnlyObj.getFullYear() === currentYear) {
             if (jenis === 'pemasukan') masukBulanIni += nominal;
             if (jenis === 'pengeluaran') keluarBulanIni += nominal;
           }
 
-          // Render Tabel (Batas max 20 baris)
           if (index < 20 && row['ID']) {
-            const formattedDate = tglObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+            // Memformat Tanggal dan Jam secara terpisah
+            const formattedDate = tsObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+            const formattedTime = tsObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            
             tableHTML += `
-              <tr class="hover:bg-black hover:text-white transition-colors cursor-pointer">
-                <td class="p-5 font-semibold">${formattedDate}</td>
+              <tr class="hover:bg-black hover:text-white transition-colors cursor-pointer group">
+                <td class="p-5">
+                  <div class="font-bold">${formattedDate}</div>
+                  <div class="text-xs font-semibold uppercase tracking-widest mt-1 opacity-80 group-hover:opacity-100">${formattedTime}</div>
+                </td>
                 <td class="p-5 font-bold uppercase text-xs tracking-wider">${row['Jenis']}</td>
                 <td class="p-5 font-semibold">${row['Kategori']}</td>
                 <td class="p-5">${row['Keterangan']}</td>
