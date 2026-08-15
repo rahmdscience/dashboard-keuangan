@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERP Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Strict Monochromatic & Glassmorphism Utilities */
+    body { background-color: #ffffff; color: #000000; }
+    .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); border: 2px solid #000000; }
+    
+    /* Off-canvas Drawer Logic */
+    #drawer { transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    #drawer.open { transform: translateX(0); }
+    #overlay { opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+    #overlay.open { opacity: 1; pointer-events: auto; }
+  </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex selection:bg-black selection:text-white">
+
+  <!-- Off-Canvas Drawer (Sidebar) -->
+  <div id="overlay" class="fixed inset-0 bg-black/50 z-40" onclick="toggleDrawer()"></div>
+  <aside id="drawer" class="fixed top-0 left-0 h-full w-72 bg-white border-r-2 border-black z-50 p-6 flex flex-col justify-between">
+    <div>
+      <div class="flex items-center justify-between mb-10">
+        <h2 class="text-2xl font-bold tracking-tight"> ERP</h2>
+        <button onclick="toggleDrawer()" class="p-2 border-2 border-black rounded-full hover:bg-black hover:text-white transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <nav class="space-y-4">
+        <a href="#" class="block px-4 py-3 bg-black text-white rounded-2xl font-semibold tracking-wide">Dashboard</a>
+        <a href="#" class="block px-4 py-3 border-2 border-transparent hover:border-black rounded-2xl font-semibold tracking-wide transition-all">Transaksi</a>
+        <a href="#" class="block px-4 py-3 border-2 border-transparent hover:border-black rounded-2xl font-semibold tracking-wide transition-all">Buku Besar</a>
+      </nav>
+    </div>
+    <div class="text-sm font-bold">V 4.0.0 Monochromatic</div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-6 md:p-12 h-screen overflow-y-auto">
+    
+    <!-- Header -->
+    <header class="flex items-center justify-between mb-12">
+      <div class="flex items-center gap-4">
+        <button onclick="toggleDrawer()" class="p-3 border-2 border-black rounded-full hover:bg-black hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+        <h1 class="text-3xl md:text-4xl font-black tracking-tighter">Ringkasan Finansial</h1>
+      </div>
+      <div id="status" class="px-4 py-2 border-2 border-black rounded-full text-sm font-bold uppercase tracking-widest">
+        Sinkronisasi...
+      </div>
+    </header>
+
+    <!-- Metrics Cards -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div class="glass-card rounded-3xl p-8 hover:bg-black hover:text-white transition-colors duration-300">
+        <h3 class="text-sm font-bold uppercase tracking-widest mb-4">Total Aset</h3>
+        <p id="ui-saldo" class="text-4xl font-black tracking-tighter">Rp0</p>
+      </div>
+      <div class="glass-card rounded-3xl p-8">
+        <h3 class="text-sm font-bold uppercase tracking-widest mb-4">Pemasukan (Bulan Ini)</h3>
+        <p id="ui-pemasukan" class="text-4xl font-black tracking-tighter">Rp0</p>
+      </div>
+      <div class="glass-card rounded-3xl p-8">
+        <h3 class="text-sm font-bold uppercase tracking-widest mb-4">Pengeluaran (Bulan Ini)</h3>
+        <p id="ui-pengeluaran" class="text-4xl font-black tracking-tighter">Rp0</p>
+      </div>
+    </section>
+
+    <!-- Data Table -->
+    <section>
+      <h2 class="text-2xl font-black tracking-tighter mb-6">Riwayat Transaksi Terbaru</h2>
+      <div class="glass-card rounded-3xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b-2 border-black">
+                <th class="p-5 font-bold uppercase tracking-widest text-sm">Tanggal</th>
+                <th class="p-5 font-bold uppercase tracking-widest text-sm">Jenis</th>
+                <th class="p-5 font-bold uppercase tracking-widest text-sm">Kategori</th>
+                <th class="p-5 font-bold uppercase tracking-widest text-sm">Keterangan</th>
+                <th class="p-5 font-bold uppercase tracking-widest text-sm">Metode</th>
+                <th class="p-5 font-bold uppercase tracking-widest text-sm text-right">Nominal</th>
+              </tr>
+            </thead>
+            <tbody id="table-body" class="divide-y-2 divide-black">
+              <!-- Data ditarik dari Google Sheets -->
+              <tr><td colspan="6" class="p-5 text-center font-bold">Memuat data dari server...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // =======================================================
+    // ⚠️ GANTI URL INI DENGAN WEB APP URL ANDA YANG BARU DI-DEPLOY
+    // =======================================================
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxPRdo7rBQnyfx-_7gZJejAjLDtYLENDc1nhdxCAIITZFoN4qYcs3rR3T3XC3LCzcg/exec';
+
+    function toggleDrawer() {
+      document.getElementById('drawer').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('open');
+    }
+
+    function formatRupiah(number) {
+      return 'Rp' + Math.abs(number).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    async function fetchData() {
+      try {
+        const response = await fetch(API_URL);
+        const json = await response.json();
+        const data = json.data;
+        
+        let totalSaldo = 0;
+        let masukBulanIni = 0;
+        let keluarBulanIni = 0;
+        
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        let tableHTML = '';
+
+        // Reverse data untuk menampilkan yang terbaru di atas
+        const reversedData = [...data].reverse();
+
+        reversedData.forEach((row, index) => {
+          const jenis = String(row['Jenis']).toLowerCase();
+          const nominal = Number(row['Nominal']) || 0;
+          const tglObj = new Date(row['Tanggal']);
+          
+          // Kalkulasi Saldo Aset (Abaikan Mutasi untuk kalkulasi saldo)
+          if (jenis === 'pemasukan' || jenis === 'utang' || jenis === 'terima piutang') totalSaldo += nominal;
+          if (jenis === 'pengeluaran' || jenis === 'bayar utang' || jenis === 'piutang') totalSaldo -= nominal;
+
+          // Kalkulasi Bulan Ini
+          if (tglObj.getMonth() === currentMonth && tglObj.getFullYear() === currentYear) {
+            if (jenis === 'pemasukan') masukBulanIni += nominal;
+            if (jenis === 'pengeluaran') keluarBulanIni += nominal;
+          }
+
+          // Render Tabel (Batas max 20 baris)
+          if (index < 20 && row['ID']) {
+            const formattedDate = tglObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+            tableHTML += `
+              <tr class="hover:bg-black hover:text-white transition-colors cursor-pointer">
+                <td class="p-5 font-semibold">${formattedDate}</td>
+                <td class="p-5 font-bold uppercase text-xs tracking-wider">${row['Jenis']}</td>
+                <td class="p-5 font-semibold">${row['Kategori']}</td>
+                <td class="p-5">${row['Keterangan']}</td>
+                <td class="p-5 font-bold">${row['Metode']}</td>
+                <td class="p-5 font-black text-right">${formatRupiah(nominal)}</td>
+              </tr>
+            `;
+          }
+        });
+
+        // Update DOM
+        document.getElementById('ui-saldo').innerText = formatRupiah(totalSaldo);
+        document.getElementById('ui-pemasukan').innerText = formatRupiah(masukBulanIni);
+        document.getElementById('ui-pengeluaran').innerText = formatRupiah(keluarBulanIni);
+        document.getElementById('table-body').innerHTML = tableHTML || '<tr><td colspan="6" class="p-5 text-center font-bold">Belum ada transaksi.</td></tr>';
+        
+        const statusEl = document.getElementById('status');
+        statusEl.innerText = 'Online';
+        statusEl.classList.add('bg-black', 'text-white');
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        document.getElementById('status').innerText = 'Offline / Error';
+        document.getElementById('table-body').innerHTML = '<tr><td colspan="6" class="p-5 text-center font-bold">Gagal memuat data. Pastikan Web App URL benar.</td></tr>';
+      }
+    }
+
+    // Jalankan saat pertama dimuat
+    fetchData();
+  </script>
+</body>
+</html>
